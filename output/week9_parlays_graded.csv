@@ -1,0 +1,42 @@
+ticket,when,note,ticket_pred,ticket_hit,leg,actual,leg_hit,miss_by
+Long-shot A (unders),pregame,my pick (unders),0.055,True,Wentz under 218.5 pass yds,81,True,
+Long-shot A (unders),pregame,my pick (unders),0.055,True,Jefferson under 6.5 rec,3,True,
+Long-shot A (unders),pregame,my pick (unders),0.055,True,Addison under 3.5 rec,2,True,
+Long-shot A (unders),pregame,my pick (unders),0.055,True,Hockenson under 4.5 rec,4,True,
+Long-shot A (unders),pregame,my pick (unders),0.055,True,Kincaid under 3.5 rec,3,True,
+Long-shot A (unders),pregame,my pick (unders),0.055,True,Coleman over 2.5 rec,3,True,
+Long-shot B,pregame,,0.024,False,Allen under 237.5 pass yds,234,True,
+Long-shot B,pregame,,0.024,False,Shakir under 40.5 rec yds,58,False,18.0
+Long-shot B,pregame,,0.024,False,Kincaid under 39.5 rec yds,28,True,
+Long-shot B,pregame,,0.024,False,Knox anytime TD,0,False,1.0
+Long-shot C (overs),pregame,,0.028,False,Allen over 237.5 pass yds,234,False,4.0
+Long-shot C (overs),pregame,,0.028,False,Wentz over 218.5 pass yds,81,False,138.0
+Long-shot C (overs),pregame,,0.028,False,Coleman over 25.5 rec yds,17,False,9.0
+Long-shot C (overs),pregame,,0.028,False,Addison over 39.5 rec yds,28,False,12.0
+Long-shot C (overs),pregame,,0.028,False,Shakir anytime TD,0,False,1.0
+Long-shot D (overs),pregame,my pick (overs),0.026,False,Allen over 237.5 pass yds,234,False,4.0
+Long-shot D (overs),pregame,my pick (overs),0.026,False,Coleman over 25.5 rec yds,17,False,9.0
+Long-shot D (overs),pregame,my pick (overs),0.026,False,Shakir anytime TD,0,False,1.0
+Long-shot D (overs),pregame,my pick (overs),0.026,False,Addison anytime TD,0,False,1.0
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,Cook anytime TD,1,True,
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,Allen anytime TD,0,False,1.0
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,Allen 225+ pass yds,234,True,
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,Addison 20+ rec yds,28,True,
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,A. Jones 20+ rush yds,16,False,4.0
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,DJ Moore 30+ rec yds,25,False,5.0
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,Bass over 6.5 kicking pts,11,True,
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,Allen 1+ pass TD,1,True,
+Placed 9-leg SGP ($2.90 to $102.95),pregame,priced (user's),0.031,False,BUF moneyline (won 23-6),17,True,
+Live A,halftime,my pick,0.324,False,BUF moneyline,17,True,
+Live A,halftime,my pick,0.324,False,Cook 60+ rush yds,107,True,
+Live A,halftime,my pick,0.324,False,Jefferson 60+ rec yds,58,False,2.0
+Live B,halftime,,0.275,False,Jefferson 5+ rec,3,False,2.0
+Live B,halftime,,0.275,False,Wentz 175+ pass yds,81,False,94.0
+Live B,halftime,,0.275,False,Hockenson 30+ rec yds,33,True,
+Live C,halftime,,0.299,False,Game total over 30.5,29,False,2.0
+Live C,halftime,,0.299,False,Allen 200+ pass yds,234,True,
+Live C,halftime,,0.299,False,Jefferson 60+ rec yds,58,False,2.0
+Live D (as priced),halftime,,0.203,True,BUF moneyline,17,True,
+Live D (as priced),halftime,,0.203,True,Allen 200+ pass yds,234,True,
+Live D (as priced),halftime,,0.203,True,Shakir 40+ rec yds,58,True,
+Live D (as priced),halftime,,0.203,True,Cook 60+ rush yds,107,True,

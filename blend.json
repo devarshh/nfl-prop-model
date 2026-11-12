@@ -1,0 +1,160 @@
+{
+ "blend": {
+  "passing_yards": {
+   "sim_weight": 0.5,
+   "sim_scale": 1.02
+  },
+  "receiving_yards": {
+   "sim_weight": 0.2,
+   "sim_scale": 1.06
+  },
+  "receptions": {
+   "sim_weight": 0.2,
+   "sim_scale": 1.06
+  },
+  "rushing_yards": {
+   "sim_weight": 0.5,
+   "sim_scale": 0.94
+  }
+ },
+ "chosen_on": [
+  2025,
+  2026
+ ],
+ "report": {
+  "passing_yards": {
+   "n": 773,
+   "corr_medians": 0.7826358924133539,
+   "bias_model": 5.546624510972501,
+   "bias_sim": 2.4120310478654594,
+   "MAE_model": 56.75574969332417,
+   "MAE_sim": 56.95278137128072,
+   "CRPS_model_test": 41.69456663364354,
+   "CRPS_sim_test": 41.735820143419666,
+   "CRPS_blend_test": 41.606954836190475,
+   "model_weight_fit": 0.6,
+   "sim_scale_fit": 0.94,
+   "model_weight_all": 0.5,
+   "sim_scale_all": 0.98,
+   "sim_coverage": {
+    "q5": 0.056921086675291076,
+    "q10": 0.12289780077619664,
+    "q25": 0.296248382923674,
+    "q50": 0.5084087968952135,
+    "q75": 0.7529107373868047,
+    "q90": 0.9042690815006468,
+    "q95": 0.9482535575679172
+   },
+   "test_gain_pct": 0.21012761260446366,
+   "test_gain_se_pct": 0.852359917381971,
+   "season_level_check_pct": 0.8979657576240307,
+   "sim_weight": 0.5,
+   "sim_scale": 1.02
+  },
+  "receiving_yards": {
+   "n": 2861,
+   "corr_medians": 0.918250288345575,
+   "bias_model": -4.185147535029165,
+   "bias_sim": -3.8110800419433764,
+   "MAE_model": 23.5552833351572,
+   "MAE_sim": 23.957532331352674,
+   "CRPS_model_test": 17.094820100024087,
+   "CRPS_sim_test": 17.2887091132141,
+   "CRPS_blend_test": 17.091757866095033,
+   "model_weight_fit": 0.7,
+   "sim_scale_fit": 0.9,
+   "model_weight_all": 0.8,
+   "sim_scale_all": 0.92,
+   "sim_coverage": {
+    "q5": 0.09122684376092276,
+    "q10": 0.12617965746242574,
+    "q25": 0.2729814750087382,
+    "q50": 0.5270884306186648,
+    "q75": 0.7731562390772457,
+    "q90": 0.9101712687871374,
+    "q95": 0.9556099265990913
+   },
+   "test_gain_pct": 0.017913226995863316,
+   "test_gain_se_pct": 0.21729763931078788,
+   "season_level_check_pct": 0.37880694295097106,
+   "sim_weight": 0.2,
+   "sim_scale": 1.06
+  },
+  "receptions": {
+   "n": 2861,
+   "corr_medians": 0.8476455085667027,
+   "bias_model": -0.16942420510485182,
+   "bias_sim": -0.13292887998477235,
+   "MAE_model": 1.694331377410368,
+   "MAE_sim": 1.7588152182827712,
+   "CRPS_model_test": 1.2610734755938218,
+   "CRPS_sim_test": 1.289559120856461,
+   "CRPS_blend_test": 1.260633157208983,
+   "model_weight_fit": 0.8,
+   "sim_scale_fit": 0.9,
+   "model_weight_all": 0.8,
+   "sim_scale_all": 0.94,
+   "sim_coverage": {
+    "q5": 0.043691017126878715,
+    "q10": 0.10555749737853898,
+    "q25": 0.25795176511709195,
+    "q50": 0.518000699056274,
+    "q75": 0.7619713386927648,
+    "q90": 0.9136665501572877,
+    "q95": 0.9570080391471514
+   },
+   "test_gain_pct": 0.034916156224058637,
+   "test_gain_se_pct": 0.19500002568548636,
+   "season_level_check_pct": 0.3809862089977134,
+   "sim_weight": 0.2,
+   "sim_scale": 1.06
+  },
+  "rushing_yards": {
+   "n": 1595,
+   "corr_medians": 0.9113067068621526,
+   "bias_model": -4.432641583883507,
+   "bias_sim": -2.7561128526645766,
+   "MAE_model": 22.04611051220051,
+   "MAE_sim": 22.197492163009404,
+   "CRPS_model_test": 15.720381839986405,
+   "CRPS_sim_test": 15.69898787091226,
+   "CRPS_blend_test": 15.497225412535697,
+   "model_weight_fit": 0.5,
+   "sim_scale_fit": 0.94,
+   "model_weight_all": 0.5,
+   "sim_scale_all": 0.94,
+   "sim_coverage": {
+    "q5": 0.05956112852664577,
+    "q10": 0.11536050156739812,
+    "q25": 0.2702194357366771,
+    "q50": 0.5454545454545454,
+    "q75": 0.7843260188087774,
+    "q90": 0.9166144200626959,
+    "q95": 0.9642633228840125
+   },
+   "test_gain_pct": 1.419535668548998,
+   "test_gain_se_pct": 1.0274004012649025,
+   "season_level_check_pct": 1.7532283472450727,
+   "sim_weight": 0.5,
+   "sim_scale": 0.94
+  }
+ },
+ "td": {
+  "sim_weight": 0.5,
+  "chosen_on": [
+   2025,
+   2026
+  ],
+  "report": {
+   "n": 6793,
+   "weight_fit": 0.5,
+   "test_gain_pct": 0.22126649347301666,
+   "test_gain_se_pct": 0.2798305617143362,
+   "logloss_stats": 0.4812141479111185,
+   "logloss_sim": 0.48150261524888244,
+   "logloss_blend": 0.47961002944965414,
+   "first_logloss_sim": 0.18824742989249915,
+   "first_logloss_naive": 0.18812813699711947
+  }
+ }
+}

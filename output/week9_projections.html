@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Week 9 prop projections</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #EDF1EB; --surface: #F8FAF6; --ink: #142019; --muted: #5A685E; --rule: #D3DBD2;
+  --turf: #2C6A3D; --turf-tint: rgba(44,106,61,.14); --band: #CBD7CD; --band-strong: #8FA895;
+  --slate: #5F6B78; --yellow: #F2C200; --yellow-edge: #7A6200; --chip: #E1E8DF;
+  --font: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0E1711; --surface: #142019; --ink: #E4ECE4; --muted: #93A397; --rule: #263429;
+    --turf: #63B57B; --turf-tint: rgba(99,181,123,.16); --band: #26362A; --band-strong: #4F6E57;
+    --slate: #A3AEBA; --yellow: #F5CB1A; --yellow-edge: #F5CB1A; --chip: #1B2A1F;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0E1711; --surface: #142019; --ink: #E4ECE4; --muted: #93A397; --rule: #263429;
+  --turf: #63B57B; --turf-tint: rgba(99,181,123,.16); --band: #26362A; --band-strong: #4F6E57;
+  --slate: #A3AEBA; --yellow: #F5CB1A; --yellow-edge: #F5CB1A; --chip: #1B2A1F;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
+  font-size: 16px; line-height: 1.45; font-variation-settings: "wdth" 100;
+  -webkit-text-size-adjust: 100%;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--bg);
+}
+.wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+
+header h1 {
+  margin: 4px 0 6px; font-weight: 800; font-size: clamp(34px, 9vw, 48px); line-height: .95;
+  font-variation-settings: "wdth" 66; letter-spacing: -.01em;
+}
+header p { margin: 0 0 4px; color: var(--muted); max-width: 34em; font-size: 15px; }
+
+.picker {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  margin: 16px -16px 0; padding: 10px 16px 10px; border-bottom: 1px solid var(--rule);
+}
+.games { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.games::-webkit-scrollbar { display: none; }
+.game-btn {
+  flex: 0 0 auto; border: 0; border-radius: 6px; background: var(--chip); color: var(--ink);
+  font: inherit; padding: 7px 11px 8px; text-align: left; cursor: pointer; line-height: 1.15;
+  position: relative;
+}
+.game-btn b { display: block; font-weight: 700; font-size: 15px; font-variation-settings: "wdth" 78; }
+.game-btn span { font-size: 12px; color: var(--muted); }
+.game-btn[aria-pressed="true"] { background: var(--turf); color: #fff; }
+.game-btn[aria-pressed="true"] span { color: rgba(255,255,255,.82); }
+.game-btn:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--yellow-edge); outline-offset: 2px; }
+.search {
+  margin-top: 10px; width: 100%; font: inherit; font-size: 16px; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px;
+}
+.search::placeholder { color: var(--muted); }
+
+.matchup { padding: 22px 0 6px; }
+.matchup h2 {
+  margin: 0; font-size: 40px; line-height: 1; font-weight: 800; font-variation-settings: "wdth" 70;
+}
+.matchup h2 small { font-size: 22px; font-weight: 500; color: var(--muted); margin: 0 6px; }
+.facts { margin: 10px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 3px 14px; font-size: 14px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; }
+
+.team { margin-top: 26px; }
+.team-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  border-bottom: 2px solid var(--ink); padding-bottom: 4px;
+}
+.team-head h3 { margin: 0; font-size: 26px; font-weight: 800; font-variation-settings: "wdth" 70; }
+.team-head span { font-size: 14px; color: var(--muted); }
+
+.player { padding: 14px 0 10px; border-bottom: 1px solid var(--rule); }
+.pname { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.pname strong { font-size: 19px; font-weight: 700; font-variation-settings: "wdth" 82; }
+.pname .pos { font-size: 13px; color: var(--muted); }
+.flag {
+  font-size: 12px; padding: 1px 7px; border-radius: 10px; border: 1px solid var(--slate); color: var(--slate);
+}
+.flag.warn { border-color: var(--yellow-edge); color: var(--yellow-edge); }
+.ctx { font-size: 13px; color: var(--muted); margin: -2px 0 6px; }
+
+.prop { display: grid; grid-template-columns: 76px 1fr 54px; align-items: center; gap: 4px 10px; padding: 6px 0; }
+.prop .lab { font-size: 14px; color: var(--muted); }
+.prop .med { text-align: right; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; font-variation-settings: "wdth" 75; }
+.track { position: relative; height: 22px; }
+.track .base { position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--rule); }
+.track .b90, .track .b50 { position: absolute; top: 6px; height: 10px; border-radius: 2px; }
+.track .b90 { background: var(--band); }
+.track .b50 { background: var(--band-strong); }
+.track .tick { position: absolute; top: 2px; width: 2px; height: 18px; background: var(--ink); margin-left: -1px; }
+.track .over { position: absolute; top: 0; bottom: 0; right: 0; background: var(--turf-tint); display: none; }
+.track .lm {
+  position: absolute; top: -3px; width: 4px; height: 28px; background: var(--yellow); margin-left: -2px;
+  box-shadow: 0 0 0 1px var(--yellow-edge); display: none;
+}
+.track.has-line .over, .track.has-line .lm { display: block; }
+.entry { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; }
+.entry label { font-size: 13px; color: var(--muted); }
+.entry input {
+  width: 76px; font: inherit; font-size: 16px; font-variant-numeric: tabular-nums; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 5px; padding: 4px 8px;
+}
+.res { font-size: 15px; font-variant-numeric: tabular-nums; }
+.res .side { font-weight: 700; }
+.res .side.o { color: var(--turf); }
+.res .side.u { color: var(--slate); }
+.res .fair { color: var(--muted); font-size: 13px; margin-left: 6px; }
+.res.idle { color: var(--muted); font-size: 13px; }
+.two { grid-column: 1 / -1; font-size: 12px; color: var(--muted); margin-top: -2px; }
+.res .both { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 1px; }
+.agree { font-size: 11px; padding: 0 6px; border-radius: 8px; margin-left: 6px; border: 1px solid var(--turf); color: var(--turf); }
+.agree.split { border-color: var(--slate); color: var(--slate); }
+.entry { flex-wrap: wrap; gap: 6px 12px; }
+.entry input.odds { width: 66px; }
+.entry .res { flex: 1 1 100%; }
+.verdict { display: inline-block; font-weight: 800; font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+           padding: 1px 8px; border-radius: 4px; margin-right: 8px; border: 1px solid transparent; }
+.verdict.bet { background: var(--turf); color: var(--bg); }
+.verdict.lean { border-color: var(--turf); color: var(--turf); }
+.verdict.pass { border-color: var(--slate); color: var(--slate); }
+.res .why { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+.rules { margin: 4px 0 10px 1.1em; padding: 0; max-width: 36em; }
+.rules li { margin: 0 0 4px; }
+
+.track .pfill { position: absolute; left: 0; top: 6px; height: 10px; border-radius: 2px; background: var(--band-strong); }
+.tdboard { margin-top: 22px; }
+.tdboard .team-head h3 { font-size: 22px; }
+.tdrow { display: grid; grid-template-columns: 1fr 48px 56px; gap: 0 10px; align-items: baseline; padding: 5px 0;
+         border-bottom: 1px solid var(--rule); font-size: 15px; font-variant-numeric: tabular-nums; }
+.tdrow .who { color: var(--muted); font-size: 13px; margin-left: 6px; }
+.tdrow .pc { text-align: right; font-weight: 700; }
+.tdrow .od { text-align: right; color: var(--muted); font-size: 13px; }
+.tdnote { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+.parlay { margin-top: 22px; }
+.parlay .team-head h3 { font-size: 22px; }
+.pctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13px; color: var(--muted); margin: 8px 0 6px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; margin-left: 4px; }
+.seg button { font: inherit; font-size: 13px; border: 0; background: var(--surface); color: var(--ink); padding: 4px 10px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--turf); color: #fff; }
+.leg { display: grid; grid-template-columns: 1fr 48px; gap: 0 10px; align-items: baseline; padding: 5px 0;
+       border-bottom: 1px solid var(--rule); font-size: 15px; font-variant-numeric: tabular-nums; }
+.leg .what { font-weight: 700; }
+.leg .who { color: var(--muted); font-size: 13px; margin-left: 6px; }
+.leg .pc { text-align: right; color: var(--muted); }
+.psum { margin: 8px 0 6px; font-size: 14px; color: var(--muted); }
+.psum b { font-size: 18px; color: var(--ink); }
+.pgame { margin-top: 16px; }
+.pgame-h { display: flex; justify-content: space-between; align-items: baseline; font-size: 15px; }
+.pgame-h span { font-size: 13px; color: var(--muted); }
+.lead { margin: 6px 0 0; color: var(--muted); font-size: 14px; max-width: 34em; }
+.empty { padding: 30px 0; color: var(--muted); }
+.notes { margin-top: 36px; font-size: 14px; color: var(--muted); }
+.notes h4 { color: var(--ink); font-size: 17px; margin: 0 0 6px; font-variation-settings: "wdth" 82; }
+.notes p { margin: 0 0 10px; max-width: 36em; }
+.legend { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; }
+.legend .track { width: 140px; flex: 0 0 auto; }
+.linkbtn { font: inherit; font-size: 14px; color: var(--turf); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; }
+@media (prefers-reduced-motion: no-preference) {
+  .track .lm, .track .over { transition: left .18s ease-out; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Week 9 prop projections</h1>
+    <p>Type a sportsbook’s line and its over and under odds under any prop (or a book’s odds on a touchdown or parlay). The page says <b>Bet</b>, <b>Lean</b> or <b>Pass</b> and why; the rules are at the bottom.</p>
+    <p>Model run Monday, Nov 9 at 6:50 PM. Final injury designations come out Friday and inactive lists about 90 minutes before kickoff. Projections assume flagged players play, so check both before you bet.</p>
+  </header>
+
+  <div class="picker">
+    <div class="games" id="games" role="group" aria-label="Choose a game"></div>
+    <input class="search" id="search" type="search" placeholder="Search all players" aria-label="Search all players" autocomplete="off">
+  </div>
+
+  <main id="main"></main>
+
+  <section class="notes">
+    <h4>How to read this</h4>
+    <div class="legend" aria-hidden="true">
+      <div class="track has-line"><div class="base"></div><div class="b90" style="left:8%;width:84%"></div><div class="b50" style="left:30%;width:38%"></div><div class="over" style="left:62%"></div><div class="tick" style="left:47%"></div><div class="lm" style="left:62%"></div></div>
+    </div>
+    <p>The light band covers the middle 80% of likely outcomes, the dark band the middle 50%, and the black tick is the median (the big number). The yellow marker is the line you entered; the shaded area to its right is the over.</p>
+    <p>Past its outermost percentiles the model extends the distribution with smooth tails, so alternate lines far from the median still get a probability (shown up to 98%; treat the far tails as rough). For receptions on a whole-number line, the probability ignores the push. “Fair” is the price at which a bet on that side would break even if the model were exactly right. At −110 you need 52.4% just to break even.</p>
+    <p>Every number blends two independent methods. The <b>stats model</b> learns from every player-game since 2016. The <b>game simulation</b> plays each game snap by snap 1,000 times, with each team’s real play-calling tendencies, tempo and 4th-down habits, its QB’s sack, scramble and accuracy profile, and each player’s usage, tuned so the average score matches the betting market. In walk-forward backtests the blend beat the stats model alone for every prop type. When you enter a line, both methods’ own probabilities are shown: if they agree on the side, the signal is stronger; if they split, treat it as close to a coin flip.</p>
+    <p><b>Touchdowns.</b> “Anytime TD” is the chance the player scores at least one rushing or receiving touchdown (passing touchdowns, kick and punt returns and 2-point conversions don’t count). It blends the stats model, built on each player’s touchdowns and red-zone and goal-line role, his team’s implied points and the opponent, with the share of the 1,000 simulated games in which he scored. 2+ TDs uses the same blend; First TD (the game’s first touchdown) comes from the simulation alone. Enter a sportsbook’s price, as American odds like +150 or decimal odds like 2.50, to see the expected value of a $1 bet. Books build a big margin into touchdown markets, so most prices will show no value; a positive EV means the model’s probability beats the price, not that the bet will win.</p>
+    <p><b>Parlays.</b> Built from the standard “X+” milestone bets (like 50+ rushing yards or 5+ receptions) and touchdown bets. Each leg’s chance is the projection on this page; how often legs hit <i>together</i> comes from the 1,000 simulated games, so it keeps how they move together: a quarterback and his receivers rise and fall together, two backs split the carries, a back’s yards and his touchdown go hand in hand. The most likely parlay is the set of legs that hit together most often with every leg capped (at 70%, 80% or 90% on its own), because without a cap it would stack near-certain legs that pay almost nothing. “Multiplying the legs” is what you’d get treating them as unrelated; sportsbooks adjust same-game parlay prices for correlation their own way, so compare their price with the fair odds. Same-game parlays use one leg per player unless you allow two (a receiver’s catches and his yards are nearly the same bet, and books price them that way). Across games it’s one leg per game, and games don’t affect each other. Questionable players, new starting quarterbacks’ passing and players tagged “Snaps ↓” are left out. In a backtest on 406 games from 2025–26, the suggested same-game parlays of 3–5 legs hit within about 2 points of their predicted chance at the 70% and 80% caps; 2-leg ones hit about 4 points less often than predicted, and 90%-cap ones about 5 points more often.</p>
+    <p>In the backtest the projections tracked sportsbook lines closely. They haven’t yet been tested on enough real lines to show they beat them, so lean on the probability more than the pick.</p>
+    <p>Weather uses typical conditions for each stadium. Retractable roofs are assumed closed when the schedule doesn’t say. “New starter” marks a QB making his first start for the team this season or after a change. “New team” marks a player who has changed teams since his last game; his projection still leans on his role with the old team.</p>
+    <h4>How Bet / Lean / Pass is decided</h4>
+    <p>For a yardage or receptions prop, enter the line and both sides’ odds (a blank side counts as −110). The page picks the side with the better expected value and then checks:</p>
+    <ol class="rules">
+      <li><b>Edge.</b> The model’s chance on that side minus the chance the price needs to break even (52.4% at −110). Bet needs 5+ points, Lean 2.5+, anything less is a Pass. The cushion is there because the model hasn’t yet been proven against real lines.</li>
+      <li><b>Both methods.</b> If the stats model and the game simulation pick different sides it’s a Pass; for a Bet each must clear break-even on its own.</li>
+      <li><b>Caution caps a Bet at Lean:</b> the player is Questionable, missed practice or just changed teams (confirm he’s active); his snap share fell 15+ points in his last two games (the “Snaps ↓” tag: in the 2024–26 backtest these players’ results landed outside the model’s middle 80% about 25% of the time instead of 20%; “Snaps ↑” players were projected fine, so that tag is information only); the line sits in the model’s rough tails (beyond its 5th–95th percentiles); or the model gives its side more than 75%, a gap that big usually means news the model hasn’t seen.</li>
+      <li><b>Known biases, adjusted for the verdict only</b> (the projections above are unchanged): new starting QBs’ passing is shaded down 20 yards (both methods ran about 21 yards high on new starters in 2025–26), and for goal-line QBs whose stats-model touchdown chance is 10+ points above the simulation’s, the touchdown chance leans 70% toward the stats model (the simulation runs low on them in the backtest).</li>
+      <li><b>Touchdowns and parlays</b> are judged on expected value per $1: Bet at +10¢ or more, Lean at +3¢, with the same checks. Two-leg same-game parlays are marked down 4 points, since they hit about that much less often than predicted in the backtest.</li>
+    </ol>
+    <p>“Bet” is not a guarantee: even a real 5-point edge loses about 45% of the time. Keep stakes small and equal, don’t stack bets that move together (a QB’s over and his receiver’s over are close to the same bet), and download what you entered before the games kick off (games disappear from this page once they start) so the weekly review can grade the suggestions: <code>python review_week.py 9 --bets ~/Downloads/week9_bets.csv</code>.</p>
+    <p><button class="linkbtn" id="export" type="button">Download my bets (CSV)</button> · <button class="linkbtn" id="clear" type="button">Clear all entered lines</button></p>
+  </section>
+</div>
+
+<script>
+const GAMES = [{"id": "2026_09_BUF_MIN", "away": "BUF", "home": "MIN", "day": "2026-11-09", "time": "20:15", "spread": -3.5, "total": 45.5, "away_tt": 24.5, "home_tt": 21.0, "away_qb": "Josh Allen", "home_qb": "Carson Wentz", "stadium": "U.S. Bank Stadium", "neutral": false, "players": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "p": "QB", "f": "", "new": false, "m": {"pass": [121.67, 146.16, 190.6, 234.8, 267.48, 320.22, 335.02], "rush": [2.7, 6.57, 19.02, 33.39, 51.47, 68.89, 80.63]}, "g": {"pass": [123.03, 146.55, 192.5, 239.08, 262.36, 320.05, 326.3], "rush": [1.64, 5.62, 19.25, 32.94, 50.3, 64.47, 73.83]}, "s": {"pass": [120.31, 145.76, 188.7, 230.52, 272.6, 320.38, 343.74], "rush": [3.76, 7.52, 18.8, 33.84, 52.64, 73.32, 87.42]}, "td": {"m": [0.447, 0.119], "g": [0.54, 0.183], "s": [0.354, 0.055], "first": 0.091}}, {"id": "00-0037248", "n": "James Cook", "t": "BUF", "p": "RB", "f": "", "new": false, "m": {"rush": [24.86, 31.21, 50.6, 76.82, 108.54, 135.5, 149.87]}, "g": {"rush": [30.92, 31.49, 51.38, 76.55, 109.68, 128.02, 137.08]}, "s": {"rush": [18.8, 30.93, 49.82, 77.08, 107.39, 142.97, 162.67]}, "td": {"m": [0.487, 0.148], "g": [0.525, 0.171], "s": [0.449, 0.125], "first": 0.123}}, {"id": "00-0035537", "n": "Ty Johnson", "t": "BUF", "p": "RB", "f": "", "new": false, "m": {}, "g": {}, "s": {}, "td": {"m": [0.171, 0.019], "g": [0.18, 0.017], "s": [0.162, 0.02], "first": 0.031}}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "p": "WR", "f": "Limited practice", "new": false, "m": {"recyd": [0.89, 6.25, 18.38, 39.57, 63.46, 87.12, 105.84], "rec": [0.46, 0.87, 1.74, 3.12, 4.18, 5.64, 6.95]}, "g": {"recyd": [1.12, 6.75, 18.21, 39.92, 62.9, 85.05, 102.88], "rec": [0.51, 0.92, 1.76, 3.16, 4.1, 5.54, 6.95]}, "s": {"recyd": [0.0, 4.24, 19.08, 38.16, 65.72, 95.4, 117.66], "rec": [0.24, 0.71, 1.68, 2.93, 4.49, 6.02, 6.98]}, "td": {"m": [0.287, 0.05], "g": [0.3, 0.05], "s": [0.273, 0.05], "first": 0.069}}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "p": "WR", "f": "", "new": false, "m": {"recyd": [1.14, 8.63, 20.4, 37.79, 57.57, 79.27, 91.66], "rec": [0.71, 1.29, 2.39, 3.95, 5.41, 6.87, 8.01]}, "g": {"recyd": [1.42, 9.2, 20.99, 38.36, 57.13, 78.38, 90.18], "rec": [0.77, 1.36, 2.43, 4.0, 5.35, 6.77, 7.94]}, "s": {"recyd": [0.0, 6.36, 18.02, 35.51, 59.36, 82.79, 97.57], "rec": [0.46, 1.02, 2.22, 3.77, 5.65, 7.27, 8.33]}, "td": {"m": [0.234, 0.031], "g": [0.267, 0.039], "s": [0.201, 0.023], "first": 0.044}}, {"id": "00-0039901", "n": "Keon Coleman", "t": "BUF", "p": "WR", "f": "Limited practice", "new": false, "m": {"recyd": [0.03, 0.87, 11.43, 27.55, 46.09, 69.29, 89.67], "rec": [-0.0, 0.37, 1.11, 2.01, 3.14, 4.4, 5.34]}, "g": {"recyd": [0.04, 1.09, 12.44, 28.6, 46.48, 70.18, 90.88], "rec": [0.05, 0.44, 1.16, 2.08, 3.15, 4.36, 5.37]}, "s": {"recyd": [0.0, 0.0, 7.42, 23.32, 44.52, 65.72, 84.8], "rec": [-0.22, 0.1, 0.89, 1.76, 3.11, 4.57, 5.22]}, "td": {"m": [0.203, 0.024], "g": [0.22, 0.026], "s": [0.187, 0.021], "first": 0.044}}, {"id": "00-0041443", "n": "Skyler Bell", "t": "BUF", "p": "WR", "f": "", "new": false, "m": {}, "g": {}, "s": {}, "td": {"m": [0.082, 0.004], "g": [0.09, 0.004], "s": [0.074, 0.003], "first": 0.018}}, {"id": "00-0038933", "n": "Dalton Kincaid", "t": "BUF", "p": "TE", "f": "", "new": false, "m": {"recyd": [0.22, 5.24, 16.62, 36.24, 55.87, 81.16, 98.57], "rec": [0.31, 0.82, 1.62, 2.73, 4.46, 5.88, 6.88]}, "g": {"recyd": [0.27, 5.22, 15.81, 34.97, 53.08, 77.87, 94.06], "rec": [0.37, 0.86, 1.6, 2.65, 4.45, 5.86, 6.85]}, "s": {"recyd": [0.0, 5.3, 19.88, 41.34, 67.05, 94.34, 116.6], "rec": [0.1, 0.65, 1.7, 3.06, 4.52, 5.95, 7.02]}, "td": {"m": [0.242, 0.031], "g": [0.24, 0.031], "s": [0.243, 0.031], "first": 0.049}}, {"id": "00-0035689", "n": "Dawson Knox", "t": "BUF", "p": "TE", "f": "", "new": false, "m": {}, "g": {}, "s": {}, "td": {"m": [0.128, 0.01], "g": [0.127, 0.008], "s": [0.129, 0.011], "first": 0.032}}, {"id": "00-0032950", "n": "Carson Wentz", "t": "MIN", "p": "QB", "f": "Returning", "new": true, "m": {"pass": [110.33, 130.11, 165.87, 208.43, 260.2, 307.64, 322.61]}, "g": {"pass": [114.58, 126.6, 158.34, 200.61, 258.26, 310.31, 314.69]}, "s": {"pass": [106.08, 133.62, 173.4, 216.24, 262.14, 304.98, 330.53]}, "td": {"m": [0.119, 0.01], "g": [0.107, 0.006], "s": [0.132, 0.015], "first": 0.027}}, {"id": "00-0033293", "n": "Aaron Jones", "t": "MIN", "p": "RB", "f": "", "new": false, "m": {"rush": [12.79, 15.77, 24.97, 43.4, 69.27, 85.04, 102.43]}, "g": {"rush": [14.29, 15.57, 23.63, 43.55, 72.74, 79.75, 98.63]}, "s": {"rush": [11.28, 15.98, 26.32, 43.24, 65.8, 90.33, 106.22]}, "td": {"m": [0.343, 0.07], "g": [0.326, 0.06], "s": [0.36, 0.08], "first": 0.09}, "rc": [0.73, 0.33]}, {"id": "00-0037525", "n": "Jordan Mason", "t": "MIN", "p": "RB", "f": "", "new": false, "m": {"rush": [5.09, 9.33, 18.9, 31.84, 53.56, 76.86, 95.03]}, "g": {"rush": [4.54, 9.26, 17.12, 27.96, 50.49, 68.09, 85.62]}, "s": {"rush": [5.64, 9.4, 20.68, 35.72, 56.63, 85.63, 104.43]}, "td": {"m": [0.274, 0.043], "g": [0.234, 0.03], "s": [0.314, 0.057], "first": 0.078}}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "p": "WR", "f": "", "new": false, "m": {"recyd": [9.43, 18.55, 35.01, 58.41, 88.72, 113.46, 126.56], "rec": [1.26, 1.93, 3.22, 4.9, 6.9, 8.43, 9.24]}, "g": {"recyd": [8.87, 18.15, 33.69, 56.58, 86.79, 108.96, 119.23], "rec": [1.18, 1.82, 3.08, 4.77, 6.73, 8.13, 8.78]}, "s": {"recyd": [11.66, 20.14, 40.28, 65.72, 96.46, 131.44, 155.87], "rec": [1.57, 2.36, 3.75, 5.4, 7.6, 9.6, 11.06]}, "td": {"m": [0.33, 0.064], "g": [0.364, 0.076], "s": [0.295, 0.051], "first": 0.08}}, {"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "p": "WR", "f": "", "new": false, "m": {"recyd": [0.5, 5.74, 20.96, 43.55, 72.51, 91.51, 110.51], "rec": [0.4, 0.78, 1.81, 2.93, 4.77, 5.91, 6.7]}, "g": {"recyd": [0.62, 5.32, 20.64, 43.57, 72.09, 89.21, 108.44], "rec": [0.42, 0.76, 1.83, 2.89, 4.82, 5.88, 6.59]}, "s": {"recyd": [0.0, 7.42, 22.26, 43.46, 74.2, 100.7, 118.77], "rec": [0.35, 0.84, 1.75, 3.06, 4.55, 6.01, 7.12]}, "td": {"m": [0.27, 0.04], "g": [0.286, 0.045], "s": [0.254, 0.034], "first": 0.051}}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "p": "TE", "f": "", "new": false, "m": {"recyd": [1.33, 6.2, 20.3, 37.03, 60.23, 77.3, 94.41], "rec": [0.56, 1.25, 2.2, 3.67, 5.15, 6.95, 7.84]}, "g": {"recyd": [1.13, 5.37, 20.08, 36.22, 59.12, 74.1, 91.23], "rec": [0.54, 1.2, 2.11, 3.56, 4.95, 6.74, 7.66]}, "s": {"recyd": [2.12, 9.54, 21.2, 40.28, 64.66, 90.1, 107.11], "rec": [0.66, 1.45, 2.53, 4.13, 5.92, 7.8, 8.57]}, "td": {"m": [0.27, 0.041], "g": [0.292, 0.047], "s": [0.249, 0.035], "first": 0.056}}], "parlays": {"1|0.7": {"p": 0.7, "ind": 0.6996606334841629, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}]}, "2|0.7": {"p": 0.516, "ind": 0.4742272698639117, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6778, "label": "25+ rec yds"}]}, "2|0.7|same": {"p": 0.61, "ind": 0.48036568183758865, "legs": [{"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 3, "p": 0.699, "label": "3+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "recyd", "x": 25, "p": 0.6872, "label": "25+ rec yds"}]}, "3|0.7": {"p": 0.363, "ind": 0.3314751835273261, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 3, "p": 0.699, "label": "3+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6778, "label": "25+ rec yds"}]}, "3|0.7|same": {"p": 0.437, "ind": 0.33609295725853905, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 3, "p": 0.699, "label": "3+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "recyd", "x": 25, "p": 0.6872, "label": "25+ rec yds"}]}, "4|0.7": {"p": 0.254, "ind": 0.2195367953159289, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 3, "p": 0.699, "label": "3+ receptions"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6911, "label": "25+ rec yds"}, {"id": "00-0038933", "n": "Dalton Kincaid", "t": "BUF", "pos": "TE", "stat": "recyd", "x": 25, "p": 0.6496, "label": "25+ rec yds"}]}, "4|0.7|same": {"p": 0.337, "ind": 0.1993648914601689, "legs": [{"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 3, "p": 0.699, "label": "3+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "recyd", "x": 25, "p": 0.6872, "label": "25+ rec yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6778, "label": "25+ rec yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 3, "p": 0.6123, "label": "3+ receptions"}]}, "5|0.7": {"p": 0.174, "ind": 0.14880119031264882, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 3, "p": 0.699, "label": "3+ receptions"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6911, "label": "25+ rec yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6778, "label": "25+ rec yds"}, {"id": "00-0038933", "n": "Dalton Kincaid", "t": "BUF", "pos": "TE", "stat": "recyd", "x": 25, "p": 0.6496, "label": "25+ rec yds"}]}, "5|0.7|same": {"p": 0.273, "ind": 0.1394877662535231, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 3, "p": 0.699, "label": "3+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "recyd", "x": 25, "p": 0.6872, "label": "25+ rec yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6778, "label": "25+ rec yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 3, "p": 0.6123, "label": "3+ receptions"}]}, "1|0.8": {"p": 0.796, "ind": 0.7951456310679612, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}]}, "2|0.8": {"p": 0.631, "ind": 0.6292618011382658, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7914, "label": "2+ receptions"}]}, "2|0.8|same": {"p": 0.682, "ind": 0.565208099640274, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.7108, "label": "25+ rec yds"}]}, "3|0.8": {"p": 0.476, "ind": 0.4861047413793103, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7914, "label": "2+ receptions"}, {"id": "00-0038933", "n": "Dalton Kincaid", "t": "BUF", "pos": "TE", "stat": "rec", "x": 2, "p": 0.7725, "label": "2+ receptions"}]}, "3|0.8|same": {"p": 0.551, "ind": 0.4472939960946305, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7914, "label": "2+ receptions"}, {"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.7108, "label": "25+ rec yds"}]}, "4|0.8": {"p": 0.364, "ind": 0.3401083512931034, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7914, "label": "2+ receptions"}, {"id": "00-0038933", "n": "Dalton Kincaid", "t": "BUF", "pos": "TE", "stat": "rec", "x": 2, "p": 0.7725, "label": "2+ receptions"}, {"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}]}, "4|0.8|same": {"p": 0.463, "ind": 0.3031741396370519, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7914, "label": "2+ receptions"}, {"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.7108, "label": "25+ rec yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6778, "label": "25+ rec yds"}]}, "5|0.8": {"p": 0.272, "ind": 0.25797542942977403, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7914, "label": "2+ receptions"}, {"id": "00-0038933", "n": "Dalton Kincaid", "t": "BUF", "pos": "TE", "stat": "rec", "x": 2, "p": 0.7725, "label": "2+ receptions"}, {"id": "00-0037248", "n": "James Cook", "t": "BUF", "pos": "RB", "stat": "rush", "x": 50, "p": 0.7585, "label": "50+ rush yds"}, {"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}]}, "5|0.8|same": {"p": 0.364, "ind": 0.21211901059447583, "legs": [{"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7951, "label": "2+ receptions"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.7914, "label": "2+ receptions"}, {"id": "00-0038994", "n": "Jordan Addison", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.7108, "label": "25+ rec yds"}, {"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 200, "p": 0.6997, "label": "200+ pass yds"}, {"id": "00-0034827", "n": "DJ Moore", "t": "BUF", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.6778, "label": "25+ rec yds"}]}, "1|0.9": {"p": 0.888, "ind": 0.8887263726372637, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}]}, "2|0.9": {"p": 0.785, "ind": 0.7744038437934703, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.8714, "label": "2+ receptions"}]}, "2|0.9|same": {"p": 0.785, "ind": 0.7744038437934703, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.8714, "label": "2+ receptions"}]}, "3|0.9": {"p": 0.672, "ind": 0.6663948866328021, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.8714, "label": "2+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 2, "p": 0.8605, "label": "2+ receptions"}]}, "3|0.9|same": {"p": 0.692, "ind": 0.6266787567473051, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.8458, "label": "25+ rec yds"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "rec", "x": 3, "p": 0.8337, "label": "3+ receptions"}]}, "4|0.9": {"p": 0.567, "ind": 0.5636218963705075, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.8714, "label": "2+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 2, "p": 0.8605, "label": "2+ receptions"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.8458, "label": "25+ rec yds"}]}, "4|0.9|same": {"p": 0.616, "ind": 0.5460650803111745, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.8714, "label": "2+ receptions"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.8458, "label": "25+ rec yds"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "rec", "x": 3, "p": 0.8337, "label": "3+ receptions"}]}, "5|0.9": {"p": 0.475, "ind": 0.471114073513409, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.8714, "label": "2+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 2, "p": 0.8605, "label": "2+ receptions"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.8458, "label": "25+ rec yds"}, {"id": "00-0037248", "n": "James Cook", "t": "BUF", "pos": "RB", "stat": "rush", "x": 40, "p": 0.8359, "label": "40+ rush yds"}]}, "5|0.9|same": {"p": 0.524, "ind": 0.469903371741458, "legs": [{"id": "00-0034857", "n": "Josh Allen", "t": "BUF", "pos": "QB", "stat": "pass", "x": 150, "p": 0.8887, "label": "150+ pass yds"}, {"id": "00-0037261", "n": "Khalil Shakir", "t": "BUF", "pos": "WR", "stat": "rec", "x": 2, "p": 0.8714, "label": "2+ receptions"}, {"id": "00-0035229", "n": "T.J. Hockenson", "t": "MIN", "pos": "TE", "stat": "rec", "x": 2, "p": 0.8605, "label": "2+ receptions"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "recyd", "x": 25, "p": 0.8458, "label": "25+ rec yds"}, {"id": "00-0036322", "n": "Justin Jefferson", "t": "MIN", "pos": "WR", "stat": "rec", "x": 3, "p": 0.8337, "label": "3+ receptions"}]}}}];
+const QS = [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95];  // quantile levels of each prop's numbers (set by run.py)
+const LO80 = QS.indexOf(0.1), LO50 = QS.indexOf(0.25), MID = QS.indexOf(0.5), HI50 = QS.indexOf(0.75), HI80 = QS.indexOf(0.9);
+const LABEL = { pass: "Pass yds", rush: "Rush yds", recyd: "Rec yds", rec: "Receptions" };
+const ORDER = ["pass", "rush", "recyd", "rec"];
+const KEY = "lines-2026-9";
+let lines = {};
+try { lines = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { lines = {}; }
+function saveLines() { try { localStorage.setItem(KEY, JSON.stringify(lines)); } catch (e) {} }
+
+const slug = g => (g.away + "-" + g.home).toLowerCase();
+function kickoff(g) {
+  const d = new Date(g.day + "T12:00:00");
+  const wd = d.toLocaleDateString("en-US", { weekday: "short" });
+  if (!g.time) return wd;
+  let [h, m] = g.time.split(":").map(Number);
+  const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12;
+  return `${wd} ${h}:${String(m).padStart(2, "0")} ${ap} ET`;
+}
+function spreadText(g) {
+  if (g.spread == null || g.total == null) return "Not posted yet";
+  const s = g.spread > 0 ? `${g.home} favored by ${g.spread}` : g.spread < 0 ? `${g.away} favored by ${-g.spread}` : "Pick’em";
+  return `${s}, total ${g.total}`;
+}
+function fmt(v, k) { return k === "rec" ? v.toFixed(1) : Math.round(v).toString(); }
+
+// P(stat <= x) from the predicted quantiles, same as model.py: straight lines between quantiles,
+// exponential tails beyond the outermost ones.
+function cdf(q, x) {
+  const n = q.length;
+  if (x < q[0]) {
+    const beta = QS[0] * Math.max(q[1] - q[0], 1e-6) / (QS[1] - QS[0]);
+    return QS[0] * Math.exp(-(q[0] - x) / beta);
+  }
+  if (x > q[n - 1]) {
+    const beta = (1 - QS[n - 1]) * Math.max(q[n - 1] - q[n - 2], 1e-6) / (QS[n - 1] - QS[n - 2]);
+    return 1 - (1 - QS[n - 1]) * Math.exp(-(x - q[n - 1]) / beta);
+  }
+  for (let i = 0; i < n - 1; i++) {
+    if (x <= q[i + 1]) {
+      const span = q[i + 1] - q[i];
+      return span > 0 ? QS[i] + (QS[i + 1] - QS[i]) * (x - q[i]) / span : QS[i + 1];
+    }
+  }
+  return QS[n - 1];
+}
+function american(p) {
+  if (p >= 0.5) return "−" + Math.round(100 * p / (1 - p));
+  return "+" + Math.round(100 * (1 - p) / p);
+}
+function pct(p) { return p < 0.005 ? "<1%" : p > 0.995 ? ">99%" : Math.round(p * 100) + "%"; }
+// Odds as typed: American (+150, -120, 150) or decimal (2.50). Returns the profit on a $1 bet that wins.
+function parseOdds(raw) {
+  const s = raw.trim().replace(/[\u2212\u2013\u2014]/g, "-").replace(/\s+/g, "");
+  if (s === "") return null;
+  if (!/^[+-]?\d+(\.\d+)?$/.test(s)) return NaN;
+  const v = parseFloat(s);
+  if (/^[+-]/.test(s) || Math.abs(v) >= 100) {
+    if (Math.abs(v) < 100) return NaN;
+    return v > 0 ? v / 100 : 100 / -v;
+  }
+  return s.includes(".") && v > 1 ? v - 1 : NaN;
+}
+function cents(ev) { return (ev >= 0 ? "+" : "\u2212") + Math.round(Math.abs(ev) * 100) + "\u00a2"; }
+
+// ---- Bet / Lean / Pass. Thresholds and bias adjustments (see "How Bet / Lean / Pass is decided"). ----
+const RULES = {
+  bet: 0.05, lean: 0.025,      // props: chance on the side minus the price's break-even
+  maxP: 0.75,                  // a model side above this caps the verdict at Lean (likely news the model missed)
+  evBet: 0.10, evLean: 0.03,   // touchdowns and parlays: expected profit per $1
+  newQbShift: -20,             // new starting QBs' passing (2025-26 backtest: both methods ~21 yds high)
+  qbTdGap: 0.10, qbTdStatsW: 0.7,  // goal-line QBs: lean toward the stats model's TD chance
+  twoLegAdj: -0.04,            // 2-leg same-game parlays hit ~4 pts below prediction in the backtest
+};
+const CAUTION = ["Questionable", "Missed practice", "New team"];
+const STD = 100 / 110;  // -110
+const pts = x => (x * 100).toFixed(1) + " pts";
+function priceOrStd(raw) {  // {w: profit per $1, std: true when the side was left blank}
+  const w = parseOdds(raw || "");
+  return w == null ? { w: STD, std: true } : isNaN(w) ? null : { w, std: false };
+}
+function sides(q, line, k) {  // chance of over, under and (whole-number receptions lines) a push
+  if (k === "rec" && Number.isInteger(line)) {
+    const o = 1 - cdf(q, line + 0.5), u = cdf(q, line - 0.5);
+    return { o, u };
+  }
+  const o = 1 - cdf(q, line);
+  return { o, u: 1 - o };
+}
+function judgeProp(p, k, line, oRaw, uRaw) {
+  const O = priceOrStd(oRaw), U = priceOrStd(uRaw);
+  if (!O || !U) return { err: "Enter odds like \u2212115, +105 or 1.91" };
+  const shift = k === "pass" && p.new ? RULES.newQbShift : 0;
+  const pr = q => sides(shift ? q.map(v => v + shift) : q, line, k);
+  const b = pr(p.m[k]);
+  const evO = b.o * O.w - b.u, evU = b.u * U.w - b.o;
+  const side = evO >= evU ? "o" : "u", w = side === "o" ? O.w : U.w;
+  const cond = x => (side === "o" ? x.o : x.u) / Math.max(x.o + x.u, 1e-9);  // chance on the side, pushes aside
+  const pS = cond(b), be = 1 / (1 + w), edge = pS - be;
+  const two = p.g && p.s && p.s[k];
+  const pg = two ? cond(pr(p.g[k])) : null, ps = two ? cond(pr(p.s[k])) : null;
+  const why = [];
+  let v;
+  if (edge < RULES.lean) {
+    v = "pass";
+    why.push(edge <= 0 ? "the price already beats the model\u2019s chance" : `edge only ${pts(edge)} (Lean needs ${pts(RULES.lean)}, Bet ${pts(RULES.bet)})`);
+  } else {
+    v = edge >= RULES.bet ? "bet" : "lean";
+    why.push(`edge ${pts(edge)}` + (v === "lean" ? ` (Bet needs ${pts(RULES.bet)})` : ""));
+    if (two && (pg < 0.5 || ps < 0.5)) { v = "pass"; why.push("the two methods pick different sides"); }
+    else if (two && v === "bet" && Math.min(pg, ps) < be) {
+      v = "lean"; why.push(`the ${pg < be ? "stats model" : "simulation"} alone doesn\u2019t clear break-even`);
+    }
+    const q = shift ? p.m[k].map(x => x + shift) : p.m[k];
+    const caps = [];
+    if (CAUTION.includes(p.f)) caps.push(`${p.f.toLowerCase()}: confirm he\u2019s active`);
+    if (p.rc && p.rc[1] < p.rc[0]) caps.push(roleNote(p));
+    if (line < q[0] || line > q[q.length - 1]) caps.push("line is in the model\u2019s rough tails");
+    if (pS > RULES.maxP) caps.push("gap this big with the market usually means news: check it first");
+    if (v !== "pass" && caps.length) { if (v === "bet") v = "lean"; why.push(...caps); }
+  }
+  if (shift) why.push(`passing shaded ${-shift} yds for a new starter`);
+  if (O.std || U.std) why.push(`${O.std && U.std ? "both sides" : O.std ? "over" : "under"} assumed \u2212110`);
+  return { v, side, pS, be, ev: Math.max(evO, evU), edge, pg, ps, why, w };
+}
+function roleNote(p) {
+  return `snap share ${p.rc[1] < p.rc[0] ? "fell" : "rose"} from ${Math.round(p.rc[0] * 100)}% to ${Math.round(p.rc[1] * 100)}% in his last 2 games: the model still leans on his old role`;
+}
+function verdictTag(v, sideTxt) {
+  return `<span class="verdict ${v}">${v === "pass" ? "Pass" : (v === "bet" ? "Bet " : "Lean ") + sideTxt}</span>`;
+}
+// Touchdowns: expected value per $1 at the book's price.
+function judgeTD(p, w) {
+  let pm = p.td.m[0], adj = "";
+  if (p.p === "QB" && p.td.s && p.td.g[0] - p.td.s[0] >= RULES.qbTdGap) {
+    pm = p.td.s[0] + RULES.qbTdStatsW * (p.td.g[0] - p.td.s[0]);
+    adj = `goal-line QB: chance raised to ${pct(pm)}, toward the stats model`;
+  }
+  const ev = Math.round((pm * w - (1 - pm)) * 100) / 100, why = [];  // whole cents, as displayed
+  const eg = p.td.g[0] * w - (1 - p.td.g[0]), es = p.td.s ? p.td.s[0] * w - (1 - p.td.s[0]) : null;
+  let v = ev >= RULES.evBet ? "bet" : ev >= RULES.evLean ? "lean" : "pass";
+  why.push(ev <= 0 ? "the price is shorter than the model\u2019s chance" : `EV ${cents(ev)} per $1` +
+           (v === "pass" ? ` (Lean needs ${cents(RULES.evLean)})` : v === "lean" ? ` (Bet needs ${cents(RULES.evBet)})` : ""));
+  if (v !== "pass") {
+    const caps = [];
+    if (es != null && (eg <= 0 || es <= 0) && !adj) caps.push(`the ${eg <= 0 ? "stats model" : "simulation"} alone sees no value`);
+    if (CAUTION.includes(p.f)) caps.push(`${p.f.toLowerCase()}: confirm he\u2019s active`);
+    if (p.rc && p.rc[1] < p.rc[0]) caps.push(roleNote(p));
+    if (caps.length) { if (v === "bet") v = "lean"; why.push(...caps); }
+  }
+  if (adj) why.push(adj);
+  return { v, pm, ev, eg, es, why };
+}
+// Parlays: expected value per $1; 2-leg same-game parlays get the backtest markdown.
+function judgeParlay(p, w, twoLegSGP) {
+  const pa = twoLegSGP ? Math.max(p + RULES.twoLegAdj, 0.001) : p;
+  const ev = Math.round((pa * w - (1 - pa)) * 100) / 100;  // whole cents, as displayed
+  const v = ev >= RULES.evBet ? "bet" : ev >= RULES.evLean ? "lean" : "pass";
+  const why = [ev <= 0 ? "the price is shorter than the parlay\u2019s chance" : `EV ${cents(ev)} per $1` +
+                (v === "pass" ? ` (Lean needs ${cents(RULES.evLean)})` : v === "lean" ? ` (Bet needs ${cents(RULES.evBet)})` : "")];
+  if (twoLegSGP) why.push(`2-leg same-game: chance marked down to ${pct(pa)}`);
+  return { v, pa, ev, why };
+}
+function domain(q, line) {
+  const pad = Math.max((q[HI80] - q[LO80]) * 0.28, 2);
+  let lo = Math.max(0, q[LO80] - pad), hi = q[HI80] + pad;
+  if (line != null && !isNaN(line)) { lo = Math.min(lo, Math.max(0, line - pad * 0.3)); hi = Math.max(hi, line + pad * 0.3); }
+  return [lo, hi];
+}
+
+function propHTML(p, k, gid) {
+  const id = `${gid}|${p.n}|${k}`;
+  const saved = lines[id];
+  return `<div class="prop" data-id="${encodeURIComponent(id)}" data-k="${k}">
+    <div class="lab">${LABEL[k]}</div>
+    <div class="track"><div class="base"></div><div class="b90"></div><div class="b50"></div><div class="over"></div><div class="tick"></div><div class="lm"></div></div>
+    <div class="med">${fmt(p.m[k][MID], k)}</div>
+    ${p.g && p.s && p.s[k] ? `<div class="two">Stats model ${fmt(p.g[k][MID], k)} · Game simulation ${fmt(p.s[k][MID], k)}</div>` : ""}
+    <div class="entry">
+      <label>Line <input class="ln" type="text" inputmode="decimal" value="${saved ?? ""}" aria-label="Sportsbook line for ${p.n} ${LABEL[k]}"></label>
+      <label>Over <input class="odds" data-s="o" type="text" inputmode="text" placeholder="−110" value="${lines[id + "|o"] ?? ""}" aria-label="Sportsbook odds for the over"></label>
+      <label>Under <input class="odds" data-s="u" type="text" inputmode="text" placeholder="−110" value="${lines[id + "|u"] ?? ""}" aria-label="Sportsbook odds for the under"></label>
+      <div class="res idle" aria-live="polite">Enter the book’s line and odds</div>
+    </div>
+  </div>`;
+}
+
+function tdHTML(p, gid) {
+  const id = `${gid}|${p.n}|td`;
+  const saved = lines[id];
+  const [any, two] = p.td.m;
+  const parts = [];
+  if (p.td.s) parts.push(`Stats model ${pct(p.td.g[0])} · Game simulation ${pct(p.td.s[0])}`);
+  parts.push(`2+ TDs ${pct(two)}`);
+  if (p.td.first != null) parts.push(`First TD ${pct(p.td.first)}`);
+  parts.push(`fair ${american(Math.min(Math.max(any, 0.01), 0.98))}`);
+  return `<div class="prop tdp" data-id="${encodeURIComponent(id)}">
+    <div class="lab">Anytime TD</div>
+    <div class="track"><div class="base"></div><div class="pfill" style="width:${(any * 100).toFixed(1)}%"></div><div class="lm"></div></div>
+    <div class="med">${pct(any)}</div>
+    <div class="two">${parts.join(" · ")}</div>
+    <div class="entry">
+      <label>Odds <input type="text" inputmode="text" value="${saved ?? ""}" aria-label="Sportsbook odds for ${p.n} to score a touchdown"></label>
+      <div class="res idle" aria-live="polite">Enter the book’s odds</div>
+    </div>
+  </div>`;
+}
+
+function paintTD(el, pl) {
+  const raw = el.querySelector("input").value;
+  const win = parseOdds(raw);
+  const t = el.querySelector(".track"), res = el.querySelector(".res");
+  if (win == null || isNaN(win)) {
+    t.classList.remove("has-line"); res.className = "res idle";
+    res.textContent = win == null ? "Enter the book’s odds" : "Enter odds like +150, \u2212120 or 2.50"; return;
+  }
+  const implied = 1 / (1 + win), j = judgeTD(pl, win);
+  t.classList.add("has-line");
+  t.querySelector(".lm").style.left = (implied * 100).toFixed(2) + "%";
+  let both = "";
+  if (j.es != null) {  // each method on its own
+    const [cls, txt] = (j.eg > 0) !== (j.es > 0) ? ["split", "models split"] : j.eg > 0 ? ["", "both agree"] : ["split", "both say no"];
+    both = `<span class="both">Stats model ${pct(pl.td.g[0])} (EV ${cents(j.eg)}), game simulation ${pct(pl.td.s[0])} (EV ${cents(j.es)})` +
+           `<span class="agree ${cls}">${txt}</span></span>`;
+  }
+  res.className = "res";
+  res.innerHTML = `${verdictTag(j.v, "yes")}<span class="side ${j.ev > 0 ? "o" : "u"}">EV ${cents(j.ev)} per $1</span>` +
+                  `<span class="fair">book implies ${pct(implied)}, model ${pct(j.pm)}</span>${both}<span class="why">${j.why.join(" · ")}</span>`;
+}
+
+function tdBoard(g) {
+  const ps = g.players.filter(p => p.td).sort((a, b) => b.td.m[0] - a.td.m[0]).slice(0, 10);
+  if (!ps.length) return "";
+  return `<section class="tdboard"><div class="team-head"><h3>Likeliest TD scorers</h3><span>anytime · fair odds</span></div>
+    ${ps.map(p => `<div class="tdrow"><span><b>${p.n}</b><span class="who">${p.p}, ${p.t}</span></span><span class="pc">${pct(p.td.m[0])}</span><span class="od">${american(Math.min(Math.max(p.td.m[0], 0.01), 0.98))}</span></div>`).join("")}
+    <p class="tdnote">Check a book’s price in each player’s “Anytime TD” row below.</p></section>`;
+}
+
+let PK = 3, PC = 0.8, PS = false;  // parlay legs, per-leg cap, whether one player may have two or more legs
+try {
+  const st = JSON.parse(localStorage.getItem("parlay-settings") || "{}");
+  if ([2, 3, 4, 5].includes(st.k)) PK = st.k;
+  if ([0.7, 0.8, 0.9].includes(st.c)) PC = st.c;
+  PS = st.s === true;
+} catch (e) {}
+function saveParlay() { try { localStorage.setItem("parlay-settings", JSON.stringify({ k: PK, c: PC, s: PS })); } catch (e) {} }
+function fairOdds(p) { return american(Math.min(Math.max(p, 0.01), 0.98)); }
+function legLine(lg) {
+  const where = lg.game ? ` · ${lg.game}` : "";
+  return `<div class="leg"><span><span class="what">${lg.n} ${lg.label}</span><span class="who">${lg.pos}, ${lg.t}${where}</span></span><span class="pc">${pct(lg.p)}</span></div>`;
+}
+function parlayControls() {
+  const seg = (vals, cur, attr, f) => `<span class="seg">${vals.map(v => `<button type="button" data-${attr}="${v}" aria-pressed="${v === cur}">${f(v)}</button>`).join("")}</span>`;
+  return `<div class="pctl"><span>Legs${seg([2, 3, 4, 5], PK, "k", v => v)}</span><span>Each leg at most${seg([0.7, 0.8, 0.9], PC, "c", v => Math.round(v * 100) + "%")}</span>` +
+         `<span>Same player twice${seg(["no", "yes"], PS ? "yes" : "no", "s", v => v === "yes" ? "Yes" : "No")}</span></div>`;
+}
+function oddsEntry(id, p, label, twoLegSGP) {
+  return `<div class="entry podds" data-id="${encodeURIComponent(id)}" data-p="${p}" data-two="${twoLegSGP ? 1 : 0}">
+    <label>Book’s odds <input type="text" inputmode="text" value="${lines[id] ?? ""}" aria-label="${label}"></label>
+    <div class="res idle" aria-live="polite">Enter the book’s price for this parlay</div></div>`;
+}
+function paintOdds(el) {
+  const p = parseFloat(el.dataset.p), win = parseOdds(el.querySelector("input").value), res = el.querySelector(".res");
+  if (win == null || isNaN(win)) {
+    res.className = "res idle";
+    res.textContent = win == null ? "Enter the book’s price for this parlay" : "Enter odds like +150, \u2212120 or 2.50"; return;
+  }
+  const j = judgeParlay(p, win, el.dataset.two === "1");
+  res.className = "res";
+  res.innerHTML = `${verdictTag(j.v, "it")}<span class="side ${j.ev > 0 ? "o" : "u"}">EV ${cents(j.ev)} per $1</span>` +
+                  `<span class="fair">book implies ${pct(1 / (1 + win))}, model ${pct(j.pa)}</span><span class="why">${j.why.join(" · ")}</span>`;
+}
+function sgpBody(g, k, c) {
+  const key = `${k}|${c}${PS ? "|same" : ""}`, r = (g.parlays || {})[key];
+  if (!r) return `<p class="tdnote">Not enough legs at or under ${Math.round(c * 100)}% in this game for ${k} legs.</p>`;
+  return `${r.legs.map(legLine).join("")}
+    <p class="psum"><b>Hits together ${pct(r.p)}</b> · fair ${fairOdds(r.p)} · multiplying the legs ${pct(r.ind)}</p>
+    ${oddsEntry(`${g.id}|parlay|${key}`, r.p, `Sportsbook odds for this ${g.away} at ${g.home} parlay`, r.legs.length === 2)}`;
+}
+function parlayCard(g) {
+  return `<section class="parlay"><div class="team-head"><h3>Most likely parlay</h3><span>same game</span></div>
+    ${parlayControls()}${sgpBody(g, PK, PC)}</section>`;
+}
+// one leg per game: the k games whose likeliest leg under the cap is likeliest (games are independent)
+function acrossGames(k, c) {
+  const singles = GAMES.filter(g => g.parlays && g.parlays[`1|${c}`]).map(g => [g, g.parlays[`1|${c}`].legs[0]])
+                       .sort((a, b) => b[1].p - a[1].p);
+  if (singles.length < k) return null;
+  const pick = singles.slice(0, k);
+  return { p: pick.reduce((a, x) => a * x[1].p, 1), legs: pick.map(([g, lg]) => Object.assign({}, lg, { game: `${g.away} at ${g.home}` })) };
+}
+function renderParlays() {
+  const r = acrossGames(PK, PC);
+  const across = r ? `${r.legs.map(legLine).join("")}<p class="psum"><b>Hits ${pct(r.p)}</b> · fair ${fairOdds(r.p)}</p>
+      ${oddsEntry(`all|parlay|${PK}|${PC}`, r.p, "Sportsbook odds for this parlay across games")}`
+    : `<p class="tdnote">Not enough games for ${PK} legs.</p>`;
+  const per = GAMES.map(g => `<div class="pgame"><div class="pgame-h"><b>${g.away} at ${g.home}</b><span>${kickoff(g)}</span></div>${sgpBody(g, PK, PC)}</div>`).join("");
+  return `<section class="matchup"><h2>Parlays</h2>
+      <p class="lead">The likeliest combinations of “X+” milestone and touchdown bets. Each leg is capped, since an uncapped parlay would just stack near-certain legs that pay nothing. Same-game chances count how often the legs hit together across the simulated games.</p></section>
+    <section class="parlay"><div class="team-head"><h3>Across games</h3><span>one leg per game</span></div>${parlayControls()}${across}</section>
+    <section class="parlay"><div class="team-head"><h3>Each game</h3><span>same-game parlays</span></div>${per}</section>`;
+}
+function wireParlay(root) {
+  root.querySelectorAll(".pctl button").forEach(b => b.addEventListener("click", () => {
+    if (b.dataset.k) PK = +b.dataset.k;
+    if (b.dataset.c) PC = +b.dataset.c;
+    if (b.dataset.s) PS = b.dataset.s === "yes";
+    saveParlay(); const y = window.scrollY; show(current); window.scrollTo(0, y);
+  }));
+  root.querySelectorAll(".podds").forEach(el => {
+    const id = decodeURIComponent(el.dataset.id);
+    paintOdds(el);
+    el.querySelector("input").addEventListener("input", e => {
+      const v = e.target.value.trim();
+      if (v === "") delete lines[id]; else lines[id] = v;
+      saveLines(); paintOdds(el);
+    });
+  });
+}
+
+function paint(el, q, pl) {
+  const k = el.dataset.k;
+  const input = el.querySelector("input.ln");
+  const raw = input.value.trim().replace(",", ".");
+  const line = raw === "" ? null : parseFloat(raw);
+  const [lo, hi] = domain(q, line);
+  const x = v => ((v - lo) / (hi - lo) * 100).toFixed(2) + "%";
+  const t = el.querySelector(".track");
+  const b90 = t.querySelector(".b90"), b50 = t.querySelector(".b50");
+  b90.style.left = x(q[LO80]); b90.style.width = ((q[HI80] - q[LO80]) / (hi - lo) * 100) + "%";
+  b50.style.left = x(q[LO50]); b50.style.width = ((q[HI50] - q[LO50]) / (hi - lo) * 100) + "%";
+  t.querySelector(".tick").style.left = x(q[MID]);
+  const res = el.querySelector(".res");
+  if (line == null || isNaN(line)) {
+    t.classList.remove("has-line"); res.className = "res idle";
+    res.textContent = raw === "" ? "Enter the book’s line and odds" : "Enter a number, like 54.5"; return;
+  }
+  t.classList.add("has-line");
+  t.querySelector(".lm").style.left = x(line);
+  t.querySelector(".over").style.left = x(line);
+  const j = judgeProp(pl, k, line, el.querySelector('input[data-s="o"]').value, el.querySelector('input[data-s="u"]').value);
+  if (j.err) { res.className = "res idle"; res.textContent = j.err; return; }
+  const over = j.side === "o", name = over ? "Over" : "Under";
+  const sp = v => (v >= 0.985 ? ">98" : v <= 0.015 ? "<2" : Math.round(v * 100)) + "%";
+  res.className = "res";
+  let both = "";
+  if (j.pg != null) {
+    const [cls, txt] = (j.pg >= 0.5) === (j.ps >= 0.5) ? ["", "both agree"] : ["split", "models split"];
+    both = `<span class="both">${name}: stats model ${sp(j.pg)}, game simulation ${sp(j.ps)}<span class="agree ${cls}">${txt}</span></span>`;
+  }
+  res.innerHTML = `${verdictTag(j.v, name.toLowerCase())}<span class="side ${over ? "o" : "u"}">${name} ${sp(j.pS)}</span>` +
+    `<span class="fair">needs ${sp(j.be)} · fair ${american(Math.min(Math.max(j.pS, 0.02), 0.98))} · EV ${cents(j.ev)} per $1</span>` +
+    `${both}<span class="why">${j.why.join(" · ")}</span>`;
+}
+
+function wire(root, playersById) {
+  root.querySelectorAll(".tdp").forEach(el => {
+    const id = decodeURIComponent(el.dataset.id);
+    const [gid, name] = id.split("|");
+    const p = playersById[gid + "|" + name];
+    paintTD(el, p);
+    el.querySelector("input").addEventListener("input", e => {
+      const v = e.target.value.trim();
+      if (v === "") delete lines[id]; else lines[id] = v;
+      saveLines(); paintTD(el, p);
+    });
+  });
+  root.querySelectorAll(".prop:not(.tdp)").forEach(el => {
+    const id = decodeURIComponent(el.dataset.id);
+    const [gid, name, k] = id.split("|");
+    const p = playersById[gid + "|" + name];
+    const q = p.m[k];
+    paint(el, q, p);
+    el.querySelectorAll("input").forEach(inp => inp.addEventListener("input", e => {
+      const key = inp.dataset.s ? `${id}|${inp.dataset.s}` : id;  // line, or over/under odds
+      const v = e.target.value.trim();
+      if (v === "") delete lines[key]; else lines[key] = v;
+      saveLines(); paint(el, q, p);
+    }));
+  });
+}
+
+function flagHTML(p) {
+  let out = "";
+  if (p.new) out += `<span class="flag warn">New starter</span>`;
+  if (p.f) out += `<span class="flag ${p.f === "Returning" ? "" : "warn"}">${p.f}</span>`;
+  if (p.rc) out += `<span class="flag warn" title="Snap share in his last 2 games vs. earlier this season">Snaps ${p.rc[1] < p.rc[0] ? "\u2193" : "\u2191"} ${Math.round(p.rc[0] * 100)}\u2192${Math.round(p.rc[1] * 100)}%</span>`;
+  return out;
+}
+function playerHTML(p, g, withCtx) {
+  const ctx = withCtx ? `<div class="ctx">${g.away} at ${g.home}, ${kickoff(g)}</div>` : "";
+  const props = ORDER.filter(k => p.m[k]).map(k => propHTML(p, k, g.id)).join("") + (p.td ? tdHTML(p, g.id) : "");
+  return `<div class="player"><div class="pname"><strong>${p.n}</strong><span class="pos">${p.p}, ${p.t}</span>${flagHTML(p)}</div>${ctx}${props}</div>`;
+}
+
+const index = {};
+GAMES.forEach(g => g.players.forEach(p => { index[g.id + "|" + p.n] = p; }));
+
+function renderGame(g) {
+  const team = (abbr, tt, qb) => {
+    const ps = g.players.filter(p => p.t === abbr);
+    return `<section class="team"><div class="team-head"><h3>${abbr}</h3><span>${tt == null ? "" : tt + " implied points"}</span></div>
+      ${ps.map(p => playerHTML(p, g, false)).join("")}</section>`;
+  };
+  const qbNew = abbr => g.players.some(p => p.t === abbr && p.p === "QB" && p.new) ? " (new starter)" : "";
+  const where = g.neutral ? `${g.stadium} (neutral site)` : g.stadium;
+  return `<section class="matchup"><h2>${g.away}<small>at</small>${g.home}</h2>
+    <dl class="facts">
+      <dt>Kickoff</dt><dd>${kickoff(g)}</dd>
+      <dt>Line</dt><dd>${spreadText(g)}</dd>
+      <dt>QBs</dt><dd>${g.away_qb}${qbNew(g.away)} vs ${g.home_qb}${qbNew(g.home)}</dd>
+      <dt>Venue</dt><dd>${where}</dd>
+    </dl></section>
+    ${tdBoard(g)}${parlayCard(g)}${team(g.away, g.away_tt)}${team(g.home, g.home_tt)}`;
+}
+
+const main = document.getElementById("main");
+const gamesEl = document.getElementById("games");
+const search = document.getElementById("search");
+let current = null;
+
+gamesEl.innerHTML = `<button class="game-btn" type="button" data-slug="parlays" aria-pressed="false"><b>Parlays</b><span>most likely</span></button>` + GAMES.map(g =>
+  `<button class="game-btn" type="button" data-slug="${slug(g)}" aria-pressed="false"><b>${g.away} at ${g.home}</b><span>${kickoff(g)}</span></button>`).join("");
+gamesEl.addEventListener("click", e => {
+  const b = e.target.closest(".game-btn"); if (!b) return;
+  search.value = ""; location.hash = b.dataset.slug;
+});
+
+function show(sl) {
+  const g = GAMES.find(x => slug(x) === sl) || GAMES[0];
+  current = sl === "parlays" ? "parlays" : slug(g);
+  gamesEl.querySelectorAll(".game-btn").forEach(b => {
+    const on = b.dataset.slug === current; b.setAttribute("aria-pressed", on);
+    if (on) b.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
+  main.innerHTML = current === "parlays" ? renderParlays() : renderGame(g);
+  wire(main, index);
+  wireParlay(main);
+}
+
+search.addEventListener("input", () => {
+  const s = search.value.trim().toLowerCase();
+  if (!s) { show(current); return; }
+  gamesEl.querySelectorAll(".game-btn").forEach(b => b.setAttribute("aria-pressed", "false"));
+  const hits = [];
+  GAMES.forEach(g => g.players.forEach(p => { if (p.n.toLowerCase().includes(s)) hits.push([p, g]); }));
+  main.innerHTML = hits.length
+    ? `<section class="team">${hits.slice(0, 40).map(([p, g]) => playerHTML(p, g, true)).join("")}</section>`
+    : `<p class="empty">No players match “${search.value.replace(/[<>&]/g, "")}”. Try a last name.</p>`;
+  wire(main, index);
+});
+
+document.getElementById("clear").addEventListener("click", () => {
+  lines = {}; saveLines();
+  main.querySelectorAll(".prop input, .podds input").forEach(i => { i.value = ""; i.dispatchEvent(new Event("input")); });
+});
+
+// Everything entered on this page, with the verdict at export time, for review_week.py --bets.
+function betRows() {
+  const out = [["game_id", "player", "player_id", "team", "market", "line", "over_odds", "under_odds", "odds",
+                "verdict", "side", "p_model", "break_even", "ev_per_dollar"]];
+  const r3 = v => (v == null || isNaN(v)) ? "" : (+v).toFixed(3);
+  GAMES.forEach(g => g.players.forEach(p => {
+    ORDER.filter(k => p.m[k]).forEach(k => {
+      const id = `${g.id}|${p.n}|${k}`, raw = lines[id];
+      const line = raw == null ? NaN : parseFloat(String(raw).replace(",", "."));
+      if (isNaN(line)) return;
+      const j = judgeProp(p, k, line, lines[id + "|o"], lines[id + "|u"]);
+      if (j.err) return;
+      out.push([g.id, p.n, p.id || "", p.t, k, line, lines[id + "|o"] || "-110", lines[id + "|u"] || "-110", "",
+                j.v, j.side === "o" ? "over" : "under", r3(j.pS), r3(j.be), r3(j.ev)]);
+    });
+    if (p.td) {
+      const raw = lines[`${g.id}|${p.n}|td`], w = raw == null ? null : parseOdds(raw);
+      if (w == null || isNaN(w)) return;
+      const j = judgeTD(p, w);
+      out.push([g.id, p.n, p.id || "", p.t, "td", "", "", "", raw, j.v, "yes", r3(j.pm), r3(1 / (1 + w)), r3(j.ev)]);
+    }
+  }));
+  return out;
+}
+document.getElementById("export").addEventListener("click", () => {
+  const rows = betRows();
+  if (rows.length < 2) { document.getElementById("export").textContent = "Nothing entered yet"; return; }
+  const csv = rows.map(r => r.map(c => /[",\n]/.test(String(c)) ? `"${String(c).replace(/"/g, '""')}"` : c).join(",")).join("\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+  a.download = "week9_bets.csv";
+  document.body.appendChild(a); a.click(); a.remove();
+});
+
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+show(location.hash.slice(1));
+</script>
+</body>
+</html>

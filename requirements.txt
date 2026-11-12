@@ -1,0 +1,6 @@
+nflreadpy>=0.1.5
+lightgbm>=4.0
+polars
+pyarrow
+pandas
+numpy

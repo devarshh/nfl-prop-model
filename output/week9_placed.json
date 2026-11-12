@@ -1,0 +1,16 @@
+[
+  {"placed": "2026-11-09 19:19", "game_id": "2026_09_BUF_MIN", "type": "same game parlay", "book_odds": "+2300",
+   "boost": "50% profit boost", "stake": 2.90, "to_return": 102.95,
+   "model_chance": {"blended": 0.0314, "simulation_only": 0.0193, "legs_unrelated": 0.0159},
+   "legs": [
+     {"leg": "James Cook anytime TD", "player": "James Cook", "market": "td", "need": 1},
+     {"leg": "Josh Allen anytime TD", "player": "Josh Allen", "market": "td", "need": 1},
+     {"leg": "Josh Allen 225+ pass yds", "player": "Josh Allen", "market": "passing_yards", "need": 225},
+     {"leg": "Jordan Addison 20+ rec yds", "player": "Jordan Addison", "market": "receiving_yards", "need": 20},
+     {"leg": "Aaron Jones 20+ rush yds", "player": "Aaron Jones", "market": "rushing_yards", "need": 20},
+     {"leg": "DJ Moore 30+ rec yds", "player": "DJ Moore", "market": "receiving_yards", "need": 30},
+     {"leg": "Tyler Bass over 6.5 kicking points", "player": "Tyler Bass", "market": "kicking_points", "need": 7},
+     {"leg": "Josh Allen 1+ pass TD", "player": "Josh Allen", "market": "passing_tds", "need": 1},
+     {"leg": "Bills moneyline", "team": "BUF", "market": "moneyline"}
+   ]}
+]

@@ -1,0 +1,58 @@
+{
+ "2026_10_WAS_NYG": {
+  "temp": 50.5,
+  "wind": 9.8,
+  "precip": 1,
+  "snow": 0,
+  "pop": 0.72,
+  "text": "Light Rain Likely"
+ },
+ "2026_10_HOU_CLE": {
+  "temp": 46.8,
+  "wind": 10.5,
+  "precip": 0,
+  "snow": 0,
+  "pop": 0.15,
+  "text": "Slight Chance Light Rain"
+ },
+ "2026_10_MIN_GB": {
+  "temp": 45.5,
+  "wind": 1.5,
+  "precip": 0,
+  "snow": 0,
+  "pop": 0.0,
+  "text": "Mostly Sunny"
+ },
+ "2026_10_BUF_NYJ": {
+  "temp": 49.0,
+  "wind": 11.5,
+  "precip": 0,
+  "snow": 0,
+  "pop": 0.0,
+  "text": "Mostly Sunny"
+ },
+ "2026_10_JAX_TEN": {
+  "temp": 53.0,
+  "wind": 5.0,
+  "precip": 0,
+  "snow": 0,
+  "pop": 0.0,
+  "text": "Sunny"
+ },
+ "2026_10_PIT_CIN": {
+  "temp": 39.8,
+  "wind": 0.2,
+  "precip": 0,
+  "snow": 0,
+  "pop": 0.0,
+  "text": "Partly Cloudy"
+ },
+ "2026_10_LAC_BAL": {
+  "temp": 41.2,
+  "wind": 2.2,
+  "precip": 0,
+  "snow": 0,
+  "pop": 0.0,
+  "text": "Mostly Clear"
+ }
+}
